@@ -55,3 +55,26 @@ class User(BaseModel):
     password_hash: str
     is_active: bool = True
     created_at: datetime = Field(default_factory=utcnow)
+
+
+class Incident(BaseModel):
+    model_config = ConfigDict(extra="ignore", use_enum_values=True, validate_default=True)
+
+    id: str = Field(default_factory=new_id)
+    track_id: int | None = None
+    camera_code: str
+    detected_at: datetime
+    label: DetectionLabel
+    confidence: float
+    plate_text: str | None = None
+    bbox: list[float] = Field(default_factory=list)  # normalized [x, y, w, h]
+    evidence_path: str | None = None
+    video_id: str | None = None
+    source: str = "detector"  # "detector" or "demo"
+    review_status: ReviewStatus = ReviewStatus.PENDING
+    reviewed_by: str | None = None
+    reviewed_by_name: str | None = None
+    reviewed_at: datetime | None = None
+    review_note: str | None = None
+    review_history: list[dict] = Field(default_factory=list)
+    created_at: datetime = Field(default_factory=utcnow)
