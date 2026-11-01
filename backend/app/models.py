@@ -38,3 +38,20 @@ class Camera(BaseModel):
     code: str
     name: str
     location: str
+
+
+class Role(str, Enum):
+    ADMIN = "admin"
+    REVIEWER = "reviewer"
+
+
+class User(BaseModel):
+    model_config = ConfigDict(extra="ignore", use_enum_values=True)
+
+    id: str = Field(default_factory=new_id)
+    email: str
+    name: str
+    role: Role = Role.REVIEWER
+    password_hash: str
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=utcnow)

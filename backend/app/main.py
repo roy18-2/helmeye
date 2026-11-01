@@ -4,7 +4,7 @@ from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
 from .database import client, ensure_indexes
-from .routers import cameras
+from .routers import auth, cameras
 
 logger = logging.getLogger("helmeye")
 
@@ -29,6 +29,7 @@ async def health():
     return {"status": "ok", "db": settings.db_name}
 
 
+api.include_router(auth.router)
 api.include_router(cameras.router)
 app.include_router(api)
 
