@@ -1,36 +1,41 @@
-import os
-from pathlib import Path
-from dotenv import load_dotenv
+import logging
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, APIRouter
-from starlette.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
+from fastapi.middleware.cors import CORSMiddleware
+from .config import settings
+from .database import client, ensure_indexes
+from .routers import cameras
 
-load_dotenv(Path(__file__).parent.parent / ".env")
+logger = logging.getLogger("helmeye")
 
-client = AsyncIOMotorClient(os.environ["MONGO_URL"])
-db = client[os.environ["DB_NAME"]]
 
-app = FastAPI(title="HelmEye API")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    try:
+        await ensure_indexes()
+    except Exception as exc:
+        logger.warning("Could not create indexes at startup: %s", exc)
+    yield
+    client.close()
+
+
+app = FastAPI(title="HelmEye API", lifespan=lifespan)
 api = APIRouter(prefix="/api")
 
 
 @api.get("/health")
 async def health():
     await client.admin.command("ping")
-    return {"status": "ok", "db": os.environ["DB_NAME"]}
+    return {"status": "ok", "db": settings.db_name}
 
 
+api.include_router(cameras.router)
 app.include_router(api)
 
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get("CORS_ORIGINS", "*").split(","),
+    allow_origins=settings.cors_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.on_event("shutdown")
-async def shutdown():
-    client.close()
