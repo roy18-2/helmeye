@@ -3,8 +3,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
-from .database import client, ensure_indexes
-from .routers import auth, cameras, incidents
+from .database import client, db, ensure_indexes
+from .routers import auth, cameras, incidents, videos
 
 logger = logging.getLogger("helmeye")
 
@@ -13,8 +13,12 @@ logger = logging.getLogger("helmeye")
 async def lifespan(app: FastAPI):
     try:
         await ensure_indexes()
+        await db.videos.update_many(
+            {"status": {"$in": ["queued", "processing"]}},
+            {"$set": {"status": "failed", "error": "Server restarted before processing finished"}},
+        )
     except Exception as exc:
-        logger.warning("Could not create indexes at startup: %s", exc)
+        logger.warning("Startup tasks failed: %s", exc)
     yield
     client.close()
 
@@ -32,6 +36,7 @@ async def health():
 api.include_router(auth.router)
 api.include_router(cameras.router)
 api.include_router(incidents.router)
+api.include_router(videos.router)
 app.include_router(api)
 
 app.add_middleware(

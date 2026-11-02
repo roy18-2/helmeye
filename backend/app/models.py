@@ -78,3 +78,31 @@ class Incident(BaseModel):
     review_note: str | None = None
     review_history: list[dict] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=utcnow)
+
+
+class Video(BaseModel):
+    model_config = ConfigDict(extra="ignore", use_enum_values=True, validate_default=True)
+
+    id: str = Field(default_factory=new_id)
+    filename: str
+    stored_name: str
+    sha256: str
+    size_bytes: int
+    camera_code: str
+    status: VideoStatus = VideoStatus.QUEUED
+    progress: int = 0
+    duration_s: float | None = None
+    fps: float | None = None
+    width: int | None = None
+    height: int | None = None
+    frame_count: int | None = None
+    sampled_frames: int = 0
+    incidents_count: int = 0
+    detector: str = "mock-v1"
+    recorded_at: datetime
+    error: str | None = None
+    uploaded_by: str
+    uploaded_by_name: str
+    created_at: datetime = Field(default_factory=utcnow)
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
