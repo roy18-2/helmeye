@@ -4,7 +4,7 @@ from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
 from .database import client, db, ensure_indexes
-from .routers import auth, cameras, incidents, videos
+from .routers import analytics, auth, cameras, incidents, replay, videos
 
 logger = logging.getLogger("helmeye")
 
@@ -37,6 +37,8 @@ api.include_router(auth.router)
 api.include_router(cameras.router)
 api.include_router(incidents.router)
 api.include_router(videos.router)
+api.include_router(replay.router)
+api.include_router(analytics.router)
 app.include_router(api)
 
 app.add_middleware(

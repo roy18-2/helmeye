@@ -30,6 +30,7 @@ async def list_incidents(
     review_status: ReviewStatus | None = None,
     camera_code: str | None = None,
     label: DetectionLabel | None = None,
+    video_id: str | None = None,
     min_confidence: float = Query(0, ge=0, le=1),
     date_from: datetime | None = None,
     date_to: datetime | None = None,
@@ -44,6 +45,8 @@ async def list_incidents(
         query["camera_code"] = camera_code
     if label:
         query["label"] = label.value
+    if video_id:
+        query["video_id"] = video_id
     if min_confidence:
         query["confidence"] = {"$gte": min_confidence}
     if date_from or date_to:
