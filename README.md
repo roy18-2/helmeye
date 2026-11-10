@@ -1,4 +1,5 @@
 # HelmEye
+[![CI](https://github.com/roy18-2/helmeye/actions/workflows/ci.yml/badge.svg)](https://github.com/roy18-2/helmeye/actions/workflows/ci.yml)
 
 A traffic-command web app for reviewing helmet-violation incidents from CCTV footage. Operators upload video, a detector pipeline flags riders without helmets, and human reviewers confirm or reject each flag.
 
