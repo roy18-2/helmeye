@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from pymongo.errors import DuplicateKeyError
 
 from ..database import db
@@ -28,6 +28,13 @@ class CreateUserRequest(BaseModel):
     name: str = Field(min_length=1, max_length=80)
     password: str = Field(min_length=8, max_length=72)
     role: Role = Role.REVIEWER
+
+    @field_validator("password")
+    @classmethod
+    def password_fits_bcrypt(cls, value: str) -> str:
+        if len(value.encode("utf-8")) > 72:
+            raise ValueError("Password must be at most 72 bytes")
+        return value
 
 
 @router.post("/login")
