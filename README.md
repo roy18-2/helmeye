@@ -124,7 +124,7 @@ python -m pip install -r requirements-dev.txt
 python -m pytest -q
 ```
 
-The tests use a separate database named `helmeye_test` on the server from `MONGO_URL`. It is dropped before and after each run, and your real data is never touched.
+The tests use a separate database named `helmeye_test` on the server from `MONGO_URL`. Its collections are emptied before and after each run, and your real data is never touched.
 
 ## Known limitations
 

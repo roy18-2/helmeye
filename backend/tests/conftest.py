@@ -22,6 +22,12 @@ from app.security import hash_password  # noqa: E402
 from tests.constants import ADMIN, INACTIVE, REVIEWER  # noqa: E402
 
 
+def _wipe(database):
+    # The Atlas user may not drop databases, so remove the test collections one by one.
+    for name in database.list_collection_names():
+        database.drop_collection(name)
+
+
 @pytest.fixture(scope="session")
 def mongo():
     assert settings.db_name.endswith("_test"), "Refusing to run tests against a non-test database"
@@ -31,9 +37,10 @@ def mongo():
     except Exception as exc:
         client.close()
         pytest.fail(f"Cannot reach MongoDB ({type(exc).__name__}). Check MONGO_URL and Atlas Network Access.")
-    client.drop_database(settings.db_name)
-    yield client[settings.db_name]
-    client.drop_database(settings.db_name)
+    database = client[settings.db_name]
+    _wipe(database)
+    yield database
+    _wipe(database)
     client.close()
 
 
